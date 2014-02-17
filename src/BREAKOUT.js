@@ -1,0 +1,301 @@
+//=========
+// BREAKOUT
+//=========
+
+
+"use strict";
+
+/* jshint browser: true, devel: true, globalstrict: true */
+
+var g_canvas = document.getElementById("myCanvas");
+var g_scores = document.getElementById("score");
+var g_lives = document.getElementById("lives");
+var g_ctx = g_canvas.getContext("2d");
+
+/* var g_ball = new Ball({
+    cx: 50,
+    cy: 200,
+    radius: 6,
+
+    xVel: 4,
+    yVel: 3,
+
+    tVel: 10,
+
+    stuck : true
+});
+*/
+var g_balls = [];
+var g_powerUps = [];
+
+//g_balls.push(g_ball);
+/*g_balls.push(new Ball({
+    cx: 50,
+    cy: 200,
+    radius: 6,
+
+    xVel: 4,
+    yVel: 3,
+
+    tVel: 10,
+
+    stuck : false
+}))*/
+
+
+/*
+0        1         2         3         4         5         6         7         8         9
+123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+*/
+
+// ============
+// PADDLE STUFF
+// ============
+
+// PADDLE 1
+
+var KEY_A = 'A'.charCodeAt(0);
+var KEY_D = 'D'.charCodeAt(0);
+var KEY_S = 'S'.charCodeAt(0);
+var KEY_X = 'X'.charCodeAt(0);
+
+var g_paddle1 = new Paddle({
+    cx : 200,
+    cy : g_canvas.height - 30,
+    
+    GO_LEFT   : KEY_A,
+    GO_RIGHT : KEY_D
+});
+
+// =============
+// GATHER INPUTS
+// =============
+
+function gatherInputs() {
+}
+
+// =================
+// UPDATE SIMULATION
+// =================
+
+
+// GAME-SPECIFIC UPDATE LOGIC
+
+function checkBalls(){
+
+        for(var i = 0; i < g_balls.length; i++){
+            if(g_balls[i].outOfBounds()){
+                deleteElement(g_balls, i);
+            }
+        }
+
+        if(g_balls.length === 0){
+			if(g_paddle1.life === 0){
+				g_paddle1.score = 0;
+				g_paddle1.life = 3;
+				g_wall.loadLevel(g_level1);
+			}
+				
+			else{
+				g_paddle1.life -= 1;
+			}
+			
+            g_balls.push((new Ball({
+                cx: 50,
+                cy: 200,
+                radius: 6,
+
+                xVel: 4,
+                yVel: 3,
+
+                tVel: 10,
+
+                stuck : true
+            })));
+        }
+
+    }
+
+    function checkPowerUps(){
+        for(var i = 0; i < g_powerUps.length; i++){
+            if(g_powerUps[i].redundant){
+                deleteElement(g_powerUps, i);
+            }
+        }
+    };
+
+        function multiball(){
+            if(g_balls.length === 0){
+                return;
+            }
+            for(var i = 0; i < 2; i++){
+                g_balls.push(
+                    new Ball({
+                    cx: g_balls[0].cx,
+                    cy: g_balls[0].cy,
+                    radius: 6,
+
+                    xVel: Math.random() * 5,
+                    yVel: g_balls[0].yVel,
+
+                    tVel: 10,
+
+                    stuck : false
+                    })
+                    )
+            }
+        }
+
+        function invinsible(){
+            for(var i = 0; i < g_balls.length; i++){
+                g_balls[i].invincible = true;
+            }
+        }
+
+        function generatePowerUp(x, y){
+            var r = Math.random();
+            var e;
+            var t;
+
+            if(r < 0.33){
+                e = invinsible;
+                t = "invinci";
+            }
+
+            else if(r < 0.66 ){
+                e = function(){g_paddle1.canFire = true};
+                t = "fire"
+            }
+
+            else{
+                e = multiball;
+                t = "multi";
+            }
+
+            g_powerUps.push(
+                new PowerUp({
+                    cx : x,
+                    cy : y,
+                    event : e,
+                    type : t
+                })
+                );
+        }
+
+function updateSimulation(du) {
+    
+    for(var b in g_balls){
+        g_balls[b].update(du);
+    }
+
+    for(var p in g_powerUps){
+        g_powerUps[p].update(du);
+    }
+
+    updateBullets(du);
+    checkBalls();
+    checkPowerUps();
+
+    g_paddle1.update(du);
+}
+
+
+// =================
+// RENDER SIMULATION
+// =================
+
+// GAME-SPECIFIC RENDERING
+
+function renderSimulation(ctx) {
+
+    renderBackdrop(ctx);
+
+    for(var b in g_balls){
+        g_balls[b].render(ctx);
+    }
+    
+
+    for(var p in g_powerUps){
+        g_powerUps[p].render(ctx);
+    }
+
+    renderBullets(ctx);
+    g_paddle1.render(ctx);
+
+    g_wall.render(ctx);
+
+	g_lives.innerText = JSON.stringify(g_paddle1.life);
+	g_scores.innerText = JSON.stringify(g_paddle1.score);
+}
+
+function renderBackdrop(ctx){
+    var spr = sprites["back"];
+    var across = Math.ceil(g_canvas.width / (spr.halfWidth * 2));
+    var updown = Math.ceil(g_canvas.height / (spr.halfHeight * 2));
+    for(var i = 0; i < updown; i++){
+        for(var j = 0; j < across; j++){
+            spr.drawCentredAt(ctx, spr.halfWidth * 2 * j + spr.halfWidth,
+                spr.halfHeight * 2 * i + spr.halfHeight);
+        }
+    }
+}
+
+// Preload
+
+var requiredImages = {
+    brickR : "gfx/baseBrick.png",
+    back : "gfx/back.png",
+    paddle : "gfx/paddle.png",
+    ball : "gfx/ball.png",
+    multi : "gfx/multi.png",
+    invinci : "gfx/invinci.png",
+    ballinvinci : "gfx/ballinvinci.png",
+    bullet : "gfx/bullet.png",
+    fire : "gfx/fire.png",
+    brickB : "gfx/baseBrickB.png",
+    brickG : "gfx/baseBrickG.png",
+    brickS : "gfx/baseBrickS.png"
+};
+
+var images = {};
+var sprites = {};
+
+imagesPreload(requiredImages, images, mainInit);
+var donk = new Audio("wav/donk.wav");
+var steel = new Audio("wav/steel.wav");
+var brickDead = new Audio("wav/brickDead.wav");
+var powerUpS = new Audio("wav/powerUp.wav");
+var fireS = new Audio("wav/fireS.wav");
+
+
+var g_level1 = "0005555555" +
+"1111555555" +
+"0000055555" +
+"2222225555" +
+"1111111555" +
+"0000000055" +
+"1111111115" +
+"3333333333";
+
+function mainInit() {
+    g_wall.loadLevel(g_level1);
+    batchToArray(images, sprites);
+    g_main.init();
+}
+
+function levelUp() {
+    var randLevel = "";
+    for(var i = 0; i < 80; i++){
+        var rand = Math.random() * 5;
+        rand = rand.toString();
+        randLevel += rand[0];
+    }
+
+    g_balls.splice(0, g_balls.length);
+	g_paddle1.life += 1;
+    checkBalls();
+    g_paddle1.canFire = false;
+    g_wall.loadLevel(randLevel);
+
+}
+

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>BREAKOUT</title>
+    <style>
+        #myCanvas { 
+		float: left; 
+		padding-left: 3em;
+		padding-right: 1em;
+		padding-top: 1em
+		}
+		#h1 {
+		padding-top: 1em;
+		}
+		#instructions{ 
+		padding-top: 1em;
+		}
+    </style>
+  </head>
+  <body>
+
+	<canvas id="myCanvas" width="400" height="500">
+	Sorry, but your browser does not support the HTML5 canvas tag.
+	</canvas>
+
+     <div id="header">
+    	<h1>Breakout!</h1>
+     </div>
+
+	<div id="instructions">
+		<h3>Keys</h3>
+		D: Paddle right<br>
+		A: Paddle left<br>
+		S: Release ball, fire
+	</div>
+	
+	<div id="livesHolder">
+		<div id="header"><h3>Lives</h3></div>
+		<div id="lives"></div>
+	</div>
+
+	<div id="scoreHolder">
+		<div id="header"><h3>Score</h3></div>
+		<div id="score"></div>
+	</div>
+	
+    <div id="output"></div>
+    <script src="src/imLoader.js"></script>
+    <script src="src/Sprite.js"></script>
+    <script src="src/utils.js"></script>
+    <script src="src/g_keys.js"></script>
+    <script src="src/Paddle.js"></script>
+    <script src="src/g_ball.js"></script>
+    <script src="src/g_main.js"></script>
+    <script src="src/update.js"></script>
+    <script src="src/render.js"></script>
+    <script src="src/powerUps.js"></script>
+    <script src="src/Bullets.js"></script>
+    <script src="src/BREAKOUT.js"></script>
+    <script src="src/BoundingBox.js"></script>
+    <script src="src/Bricks.js"></script>
+  </body>
+</html>
